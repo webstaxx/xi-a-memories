@@ -573,7 +573,8 @@
 
       return {
         cloudName: CLOUDINARY_CONFIG.cloudName,
-        container: "#cloudinary-gallery-container",
+        // Change this line to target the direct DOM element instead of a string ID
+        container: document.getElementById("cloudinary-gallery-container"),
         displayProps: { mode: "classic", columns: 3 },
         aspectRatio: "16:9",
         carouselStyle: "thumbnails",
@@ -611,12 +612,18 @@
         console.warn("Cloudinary widget not loaded yet.");
         return;
       }
+      
+      const containerEl = document.getElementById("cloudinary-gallery-container");
+      
       // Destroy existing widget cleanly
       if (galleryWidget && typeof galleryWidget.destroy === "function") {
         try { galleryWidget.destroy(); } catch(e) {}
       }
-      document.getElementById("cloudinary-gallery-container").innerHTML = "";
+      
+      // Wipe the container clean
+      containerEl.innerHTML = "";
 
+      // Initialize using the direct element options
       galleryWidget = cloudinary.galleryWidget(buildGalleryOptions(tag));
       galleryWidget.render();
     }
@@ -625,30 +632,44 @@
       initGallery(tag);
     }
 
-    /* ═══════════════════════════════════════════════════
-       SPLASH SCREEN → MAIN REVEAL
-    ═══════════════════════════════════════════════════ */
-    const splash    = document.getElementById("splash-screen");
+/* ═══════════════════════════════════════════════════
+       SPLASH SCREEN → MAIN REVEAL (REVISED WITH BOOT STRAP)
+       ═══════════════════════════════════════════════════ */
+    const splash = document.getElementById("splash-screen");
     const mainContent = document.getElementById("main-content");
 
-    function revealMain() {
-      mainContent.classList.remove("hidden");
-      // Small pause so layout is ready, then fade splash
-      requestAnimationFrame(() => {
-        splash.classList.add("fade-out");
-        splash.addEventListener("transitionend", () => {
-          splash.remove();
-        }, { once: true });
-      });
+    let isTimeElapsed = false;
+    let isWindowLoaded = false;
 
-      // Init gallery and first caption
-      initGallery("all");
-      setCaption("all");
+    function attemptReveal() {
+      // ONLY reveal if both the 2.5s timer has hit AND the scripts are fully downloaded
+      if (isTimeElapsed && isWindowLoaded) {
+        mainContent.classList.remove("hidden");
+        
+        requestAnimationFrame(() => {
+          splash.classList.add("fade-out");
+          splash.addEventListener("transitionend", () => {
+            splash.remove();
+          }, { once: true });
+        });
+
+        // Initialize gallery and first caption safely
+        initGallery("all");
+        setCaption("all");
+      }
     }
 
-    // Hold splash for 2.5s, then start 0.9s fade → total ~3.4s experience
-    setTimeout(revealMain, 2500);
+    // 1. Kick off the minimum 2.5s splash animation timer
+    setTimeout(() => {
+      isTimeElapsed = true;
+      attemptReveal();
+    }, 2500);
 
+    // 2. Safety Net: Wait until all network assets and external scripts are 100% ready
+    window.addEventListener("load", () => {
+      isWindowLoaded = true;
+      attemptReveal();
+    });
   </script>
 </body>
 </html>
