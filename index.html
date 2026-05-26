@@ -270,6 +270,31 @@
       transform: translateY(-3px);
     }
 
+        /* ── Card heading strip (NEW) ── */
+    .card-heading-strip {
+      padding: 20px 20px 6px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 6px;
+      border-bottom: 1px solid rgba(255,179,204,.12);
+    }
+    .card-heading-strip .relive-label {
+      font-family: 'Crimson Pro', serif;
+      font-size: clamp(.6rem,2vw,.7rem);
+      font-weight: 300; letter-spacing: .3em;
+      text-transform: uppercase; color: var(--ink-ghost);
+    }
+    .card-heading-strip h2 {
+      font-family: 'Sacramento', cursive;
+      font-size: clamp(1.8rem,6vw,2.6rem);
+      color: var(--bloom-crimson); line-height: 1.15;
+      text-shadow: 0 1px 12px rgba(192,75,110,.12);
+    }
+    .strip-rule {
+      width: 52px; height: 1.5px;
+      background: linear-gradient(to right,transparent,var(--bloom-petal),transparent);
+      margin-top: 2px;
+    }
+
     /* ───────────────────────────────────────
        TAG PILLS (category filter)
     ─────────────────────────────────────── */
@@ -446,6 +471,13 @@
       <!-- Central Floating Narrative Card -->
       <div class="memory-card">
 
+        <!-- Heading strip -->
+        <div class="card-heading-strip">
+          <span class="relive-label">scroll through</span>
+          <h2>Relive the Memories</h2>
+          <div class="strip-rule"></div>
+        </div>
+        
         <!-- Tag Filter Bar -->
         <nav class="tag-filter-bar" aria-label="Memory categories">
           <button class="tag-pill active" data-tag="all">all memories</button>
@@ -489,7 +521,7 @@
     ═══════════════════════════════════════════════════ */
     const CLOUDINARY_CONFIG = {
       cloudName: "dka5mpokp",
-      activeTags: ["christmas", "exhibition", "tour", "sahrdaya", "vimala"]
+      activeTags: ["christmas", "egg", "exhibition", "tour", "sahrdaya", "vimala"]
     };
 
     const MEMORY_CAPTIONS_MAP = {
