@@ -270,13 +270,38 @@
       transform: translateY(-3px);
     }
 
+        /* ── Card heading strip (NEW) ── */
+    .card-heading-strip {
+      padding: 20px 20px 6px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 6px;
+      border-bottom: 1px solid rgba(255,179,204,.12);
+    }
+    .card-heading-strip .relive-label {
+      font-family: 'Crimson Pro', serif;
+      font-size: clamp(.6rem,2vw,.7rem);
+      font-weight: 300; letter-spacing: .3em;
+      text-transform: uppercase; color: var(--ink-ghost);
+    }
+    .card-heading-strip h2 {
+      font-family: 'Sacramento', cursive;
+      font-size: clamp(1.8rem,6vw,2.6rem);
+      color: var(--bloom-crimson); line-height: 1.15;
+      text-shadow: 0 1px 12px rgba(192,75,110,.12);
+    }
+    .strip-rule {
+      width: 52px; height: 1.5px;
+      background: linear-gradient(to right,transparent,var(--bloom-petal),transparent);
+      margin-top: 2px;
+    }
+
     /* ───────────────────────────────────────
        TAG PILLS (category filter)
     ─────────────────────────────────────── */
     .tag-filter-bar {
       display: flex;
       gap: 8px;
-      padding: 20px 20px 0;
+      padding: 10px 20px;
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
@@ -446,14 +471,23 @@
       <!-- Central Floating Narrative Card -->
       <div class="memory-card">
 
+        <!-- Heading strip -->
+        <div class="card-heading-strip">
+          <span class="relive-label">scroll through</span>
+          <h2>Relive the Memories</h2>
+          <div class="strip-rule"></div>
+        </div>
+        
         <!-- Tag Filter Bar -->
         <nav class="tag-filter-bar" aria-label="Memory categories">
           <button class="tag-pill active" data-tag="all">all memories</button>
-          <button class="tag-pill" data-tag="vimala">vimala</button>
-          <button class="tag-pill" data-tag="sahrdaya">sahrdaya</button>
-          <button class="tag-pill" data-tag="tour">tour</button>
           <button class="tag-pill" data-tag="christmas">christmas</button>
           <button class="tag-pill" data-tag="exhibition">exhibition</button>
+          <button class="tag-pill" data-tag="sahrdaya">sahrdaya</button>
+          <button class="tag-pill" data-tag="vimala">vimala</button>
+          <button class="tag-pill" data-tag="tour">tour</button>
+          
+          
         </nav>
 
         <!-- Cloudinary Widget Mount Point -->
@@ -487,39 +521,39 @@
     ═══════════════════════════════════════════════════ */
     const CLOUDINARY_CONFIG = {
       cloudName: "dka5mpokp",
-      activeTags: ["vimala", "sahrdaya", "tour", "christmas", "exhibition"]
+      activeTags: ["christmas", "egg", "exhibition", "tour", "sahrdaya", "vimala"]
     };
 
     const MEMORY_CAPTIONS_MAP = {
       "vimala": [
-        "Placeholder Vimala 1: Inside joke or text goes here...",
-        "Placeholder Vimala 2: Inside joke or text goes here...",
-        "Placeholder Vimala 3: Inside joke or text goes here..."
+        "Deeply psychological experience!",
+        "Physics Expo sent electricity through you",
+        "I hope nobody fell for the Ghost Selfie cam prank"
       ],
       "sahrdaya": [
-        "Placeholder Sahrdaya 1: Inside joke or text goes here...",
-        "Placeholder Sahrdaya 2: Inside joke or text goes here...",
-        "Placeholder Sahrdaya 3: Inside joke or text goes here..."
+        "Nammal thookki! prizes ellam thookki!",
+        "Was just happy to be here.",
+        "They had really cute pet Rabbits"
       ],
       "tour": [
-        "Placeholder Tour 1: Inside joke or text goes here...",
-        "Placeholder Tour 2: Inside joke or text goes here...",
-        "Placeholder Tour 3: Inside joke or text goes here..."
+        '"Josephe... 9thum 11thum ore bussil aahn, venel vanno..."',
+        "I need one more statement",
+        "Highly inexpensive tour!!"
       ],
       "christmas": [
-        "Placeholder Christmas 1: Inside joke or text goes here...",
-        "Placeholder Christmas 2: Inside joke or text goes here...",
-        "Placeholder Christmas 3: Inside joke or text goes here..."
+        "Exotic Coconut-leaf Christmas tree",
+        "Highly uneventful Christmas Celebration",
+        "We won that one, fair and Square. Feji can't beat us down."
       ],
       "exhibition": [
-        "Placeholder Exhibition 1: Inside joke or text goes here...",
-        "Placeholder Exhibition 2: Inside joke or text goes here...",
-        "Placeholder Exhibition 3: Inside joke or text goes here..."
+        "ONE-DAY WONDER!",
+        "Telephone booth stood up on hopes and dreams..",
+        "Abhinav's Spotify premium carried the prep work"
       ],
       "all": [
         "Every photo here is a piece of our heart, Miss...",
         "Thank you for every laugh, every lesson, every memory.",
-        "Some teachers teach subjects. You taught us to care."
+        '"Nallath parayippichillenkilum, mosham parayippikkaruth"'
       ]
     };
 
@@ -573,7 +607,8 @@
 
       return {
         cloudName: CLOUDINARY_CONFIG.cloudName,
-        container: "#cloudinary-gallery-container",
+        // Change this line to target the direct DOM element instead of a string ID
+        container: document.getElementById("cloudinary-gallery-container"),
         displayProps: { mode: "classic", columns: 3 },
         aspectRatio: "16:9",
         carouselStyle: "thumbnails",
@@ -586,7 +621,10 @@
           iconColor: "#c04b6e",
           color: "rgba(255,240,245,0.95)"
         },
-        mediaAssets: tagsToLoad.map(t => ({ tag: t })),
+        mediaAssets: tagsToLoad.flatMap(t => [
+          { tag: t, mediaType: "image" },
+          { tag: t, mediaType: "video" }
+        ]),
         events: {
           assetChanged: (data) => {
             // Identify tag of current asset from its public_id or tags
@@ -611,12 +649,18 @@
         console.warn("Cloudinary widget not loaded yet.");
         return;
       }
+      
+      const containerEl = document.getElementById("cloudinary-gallery-container");
+      
       // Destroy existing widget cleanly
       if (galleryWidget && typeof galleryWidget.destroy === "function") {
         try { galleryWidget.destroy(); } catch(e) {}
       }
-      document.getElementById("cloudinary-gallery-container").innerHTML = "";
+      
+      // Wipe the container clean
+      containerEl.innerHTML = "";
 
+      // Initialize using the direct element options
       galleryWidget = cloudinary.galleryWidget(buildGalleryOptions(tag));
       galleryWidget.render();
     }
@@ -625,30 +669,44 @@
       initGallery(tag);
     }
 
-    /* ═══════════════════════════════════════════════════
-       SPLASH SCREEN → MAIN REVEAL
-    ═══════════════════════════════════════════════════ */
-    const splash    = document.getElementById("splash-screen");
+/* ═══════════════════════════════════════════════════
+       SPLASH SCREEN → MAIN REVEAL (REVISED WITH BOOT STRAP)
+       ═══════════════════════════════════════════════════ */
+    const splash = document.getElementById("splash-screen");
     const mainContent = document.getElementById("main-content");
 
-    function revealMain() {
-      mainContent.classList.remove("hidden");
-      // Small pause so layout is ready, then fade splash
-      requestAnimationFrame(() => {
-        splash.classList.add("fade-out");
-        splash.addEventListener("transitionend", () => {
-          splash.remove();
-        }, { once: true });
-      });
+    let isTimeElapsed = false;
+    let isWindowLoaded = false;
 
-      // Init gallery and first caption
-      initGallery("all");
-      setCaption("all");
+    function attemptReveal() {
+      // ONLY reveal if both the 2.5s timer has hit AND the scripts are fully downloaded
+      if (isTimeElapsed && isWindowLoaded) {
+        mainContent.classList.remove("hidden");
+        
+        requestAnimationFrame(() => {
+          splash.classList.add("fade-out");
+          splash.addEventListener("transitionend", () => {
+            splash.remove();
+          }, { once: true });
+        });
+
+        // Initialize gallery and first caption safely
+        initGallery("all");
+        setCaption("all");
+      }
     }
 
-    // Hold splash for 2.5s, then start 0.9s fade → total ~3.4s experience
-    setTimeout(revealMain, 2500);
+    // 1. Kick off the minimum 2.5s splash animation timer
+    setTimeout(() => {
+      isTimeElapsed = true;
+      attemptReveal();
+    }, 2500);
 
+    // 2. Safety Net: Wait until all network assets and external scripts are 100% ready
+    window.addEventListener("load", () => {
+      isWindowLoaded = true;
+      attemptReveal();
+    });
   </script>
 </body>
 </html>
